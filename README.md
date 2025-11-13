@@ -1,22 +1,22 @@
-# Loan Prediction System
+# 💰 Loan Prediction System (Django + Machine Learning)
 
-A Machine Learning powered **Loan Prediction Web Application** built using **Django** and a **Random Forest Classifier**.  
-The project allows users to upload a dataset, train a ML model, view analysis, and predict loan approval status.
+A web application built using **Django** and **Random Forest Classifier** to predict whether a loan should be approved.  
+This project supports dataset upload, model training, analysis, and prediction.
 
 ---
 
 ## 🚀 Features
 
-- Upload CSV dataset  
-- Train Random Forest model  
-- Save trained model (`optimized_loan_model.pkl`)  
-- View model performance metrics  
-- Predict loan approval from input  
-- Clean and structured UI using HTML & Bootstrap  
+- 📂 Upload CSV dataset  
+- 🤖 Train Random Forest ML model  
+- 📈 Display model accuracy & analysis  
+- 🔮 Predict loan approval  
+- 💾 Save/load trained model  
+- 🎨 Clean UI using HTML & Bootstrap  
 
 ---
 
-# 📁 Project Structure
+## 📁 Project Structure
 
 ```plaintext
 Project Root/
@@ -54,76 +54,110 @@ Project Root/
         ├── result.html
         ├── aboutus.html
         └── layout.html
-
-
-## 🛠️ How to Run This Project on Local Machine
-
-### 1. Clone the Repository
-
 ```
+
+---
+
+# 🛠️ Setup Instructions
+
+## 1️⃣ Clone the Repository
+
+```bash
 git clone https://github.com/dafalsanika30/LoanPrediction.git
 cd LoanPrediction
 ```
 
-### 2. Create a Virtual Environment
+---
 
-Windows:
+## 2️⃣ Create Virtual Environment
 
-```
-python -m venv venv
-```
-
-Activate:
-
-```
-venv\Scripts\activate
+### Windows
+```bash
+python -m venv env
+env\Scripts\activate
 ```
 
-### 3. Install Required Packages
-
+### Linux / Mac
+```bash
+python3 -m venv env
+source env/bin/activate
 ```
-pip install -r requirements.txt
+
+---
+
+## 3️⃣ Install Dependencies
+
+### Windows:
+```bash
+pip install -r requirement.txt
 ```
 
-### 4. Apply Migrations
-
+### Linux:
+```bash
+pip3 install -r requirement.txt
 ```
+
+---
+
+## 4️⃣ Apply Migrations
+
+### Windows:
+```bash
 python manage.py makemigrations
 python manage.py migrate
 ```
 
-### 5. Run the Django Server
-
+### Linux:
+```bash
+python3 manage.py makemigrations
+python3 manage.py migrate
 ```
+
+---
+
+## 5️⃣ Start the Development Server
+
+### Windows:
+```bash
 python manage.py runserver
 ```
 
-Open in browser:
+### Linux:
+```bash
+python3 manage.py runserver
+```
 
+Open browser:
 ```
 http://127.0.0.1:8000/
 ```
 
-## 🔧 Tech Stack Used
+---
 
-- Python  
-- Django  
-- Machine Learning (Random Forest Classifier)  
-- Pandas  
-- NumPy  
-- Bootstrap  
+## 📊 Machine Learning Details
 
-## 📊 Machine Learning Model
+- **Algorithm:** RandomForestClassifier  
+- **Scaler:** StandardScaler  
+- **Trained Model:** optimized_loan_model.pkl  
+- **Scaler File:** scaler.pkl  
+- **Result Cache:** last_model_results.pkl  
 
-- Algorithm: RandomForestClassifier  
-- Evaluation metrics:
-  - Accuracy Score  
-  - Confusion Matrix  
-  - Precision, Recall, F1  
+---
 
-The trained model is saved as `MLmodel.pkl`.
+## 🔧 Tech Stack
 
-## 👤 Author
+| Layer | Technology |
+|-------|------------|
+| Backend | Django |
+| Machine Learning | Scikit-Learn |
+| Data Handling | Pandas, NumPy |
+| Frontend | HTML, CSS, Bootstrap |
+| Database | SQLite |
 
-Sanika Vijay Dafal  
-MCA Student — Loan Prediction Mini Project
+---
+
+## 👩‍💻 Author
+
+**Sanika Vijay Dafal**  
+MCA Student – IMCC College  
+Loan Prediction Mini Project  
