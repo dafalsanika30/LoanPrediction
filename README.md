@@ -1,19 +1,24 @@
 # Loan Prediction System
 
-A web-based Loan Prediction System built using **Django**, **Machine Learning (Random Forest)**, and **Bootstrap**.  
-The system allows users to upload CSV data, train a model, view training metrics, and predict whether a loan should be approved based on input features.
+A Machine Learning powered **Loan Prediction Web Application** built using **Django** and a **Random Forest Classifier**.  
+The project allows users to upload a dataset, train a ML model, view analysis, and predict loan approval status.
+
+---
 
 ## 🚀 Features
 
 - Upload CSV dataset  
-- Train Machine Learning model (Random Forest)  
-- View accuracy & performance metrics  
-- Predict loan approval  
-- Simple & clean UI  
-- Django backend + ML model integration  
+- Train Random Forest model  
+- Save trained model (`optimized_loan_model.pkl`)  
+- View model performance metrics  
+- Predict loan approval from input  
+- Clean and structured UI using HTML & Bootstrap  
 
-## 📂 Project Structure
+---
 
+# 📁 Project Structure
+
+```plaintext
 Project Root/
 │
 ├── manage.py
@@ -22,33 +27,34 @@ Project Root/
 ├── loan_approval_dataset.csv
 ├── .gitignore
 │
-├── LoanPrediction/ # Main Django App
-│ ├── settings.py
-│ ├── urls.py
-│ ├── views.py
-│ ├── forms.py
-│ ├── asgi.py
-│ └── wsgi.py
+├── LoanPrediction/              # Main Django App
+│   ├── settings.py
+│   ├── urls.py
+│   ├── views.py
+│   ├── forms.py
+│   ├── asgi.py
+│   └── wsgi.py
 │
-├── media/ # ML model files & uploaded data
-│ ├── last_model_results.pkl
-│ ├── last_uploaded_file.pkl
-│ ├── loan_approval_dataset.csv
-│ ├── optimized_loan_model.pkl
-│ └── scaler.pkl
+├── media/                       # ML model files & uploaded data
+│   ├── last_model_results.pkl
+│   ├── last_uploaded_file.pkl
+│   ├── loan_approval_dataset.csv
+│   ├── optimized_loan_model.pkl
+│   └── scaler.pkl
 │
 ├── static/
-│ └── styles.css
+│   └── styles.css
 │
 └── template/
-  └── website/
-  ├── index.html
-  ├── upload.html
-  ├── analysis.html
-  ├── predict.html
-  ├── result.html
-  ├── aboutus.html
-  └── layout.html
+    └── website/
+        ├── index.html
+        ├── upload.html
+        ├── analysis.html
+        ├── predict.html
+        ├── result.html
+        ├── aboutus.html
+        └── layout.html
+
 
 ## 🛠️ How to Run This Project on Local Machine
 
