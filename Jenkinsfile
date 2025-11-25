@@ -18,17 +18,19 @@ pipeline {
         stage('SonarQube Analysis') {
     steps {
         withSonarQubeEnv("${SONARQUBE_SERVER}") {
-            script {
-                def scannerHome = tool "${SONARQUBE_SCANNER}"
-                sh """
-                   ${scannerHome}/bin/sonar-scanner \
-                     -Dsonar.projectKey=LoanPrediction \
-                     -Dsonar.projectName=LoanPrediction \
-                     -Dsonar.sources=. \
-                     -Dsonar.python.version=3.10 \
-                     -Dsonar.sourceEncoding=UTF-8 \
-                     -Dsonar.login=$squ_ceccbc7583715730709b899956722a73a3585c26
-                """
+            withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                script {
+                    def scannerHome = tool "${SONARQUBE_SCANNER}"
+                    sh """
+                       ${scannerHome}/bin/sonar-scanner \
+                         -Dsonar.projectKey=LoanPrediction \
+                         -Dsonar.projectName=LoanPrediction \
+                         -Dsonar.sources=. \
+                         -Dsonar.python.version=3.10 \
+                         -Dsonar.sourceEncoding=UTF-8 \
+                         -Dsonar.login=$SONAR_TOKEN
+                    """
+                }
             }
         }
     }
