@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
         - name: loan-app
-          image: loan-app:latest   # change to your Nexus image later
+          image: nexus.imcc.com:8085/docker-hosted/loan-app:latest   # change to your Nexus image later
           ports:
             - containerPort: 8000
