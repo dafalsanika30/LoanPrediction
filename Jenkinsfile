@@ -13,11 +13,7 @@ pipeline {
 
     stages {
 
-        stage('Checkout') {
-            steps {
-                git 'https://github.com/dafalsanika30/LoanPrediction.git'
-            }
-        }
+        
 
         stage('SonarQube Analysis') {
             steps {
