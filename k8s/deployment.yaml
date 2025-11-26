@@ -1,21 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: loan-app-deployment
+  name: loan-deploy-2401034
+  namespace: student-2401034
   labels:
-    app: loan-app
+    app: loan-app-2401034
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: loan-app
+      app: loan-app-2401034
   template:
     metadata:
       labels:
-        app: loan-app
+        app: loan-app-2401034
     spec:
       containers:
-        - name: loan-app
-          image: nexus.imcc.com:8085/docker-hosted/loan-app:latest   # change to your Nexus image later
+        - name: loan-container
+          image: nexus.imcc.com:8083/docker-hosted/loan-app-2401034:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 8000
