@@ -7,23 +7,23 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# Install system deps (if you later use Postgres, add libpq-dev etc.)
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
  && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
+# Install python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy project code
+# Copy project files
 COPY . .
 
-# Collect static files (won’t fail if you don’t have STATIC_ROOT)
+# Collect static files (optional, won't break if not configured)
 RUN python manage.py collectstatic --noinput || true
 
-# Expose Django/Gunicorn port
+# Expose Django default port
 EXPOSE 8000
 
-# Run with gunicorn (your Django project is LoanPrediction)
-CMD ["gunicorn", "LoanPrediction.wsgi:application", "--bind", "0.0.0.0:8000"]
+# Run Django development server
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
