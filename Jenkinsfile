@@ -2,29 +2,26 @@ pipeline {
     agent any
 
     environment {
-        // ---- SonarQube ----
-        SONARQUBE_SERVER  = 'MySonarQube'      // must match name in Jenkins "Configure System"
-        SONARQUBE_SCANNER = 'Sonar-Scanner'    // must match tool name in Jenkins "Global Tool Config"
+        SONARQUBE_SERVER  = 'MySonarQube'
+        SONARQUBE_SCANNER = 'Sonar-Scanner'
 
-        // ---- Docker / Nexus ----
-        IMAGE_NAME = 'loan-app'
+        ROLL = '2401034'
+
+        IMAGE_NAME = "loan-app-${ROLL}"
         IMAGE_TAG  = 'latest'
 
-        // Example: if your Docker hosted repo URL is nexus.imcc.com:8083
-        // ask your sir what exact URL/port to use and update this:
         REGISTRY   = 'nexus.imcc.com:8083'
-        NEXUS_REPO = 'docker-hosted'           // Docker hosted repo name in Nexus
+        NEXUS_REPO = 'docker-hosted'
 
-        // ---- Kubernetes ----
-        K8S_NAMESPACE = 'loanprediction'       // or "default" if they didn't give namespace
+        K8S_NAMESPACE = "student-${ROLL}"
+        DEPLOYMENT_NAME = "loan-deploy-${ROLL}"
+        SERVICE_NAME    = "loan-svc-${ROLL}"
     }
 
     stages {
 
         stage('Checkout') {
-            steps {
-                checkout scm
-            }
+            steps { checkout scm }
         }
 
         stage('SonarQube Analysis') {
@@ -35,8 +32,8 @@ pipeline {
                             def scannerHome = tool "${SONARQUBE_SCANNER}"
                             sh """
                                 ${scannerHome}/bin/sonar-scanner \
-                                  -Dsonar.projectKey=LoanPrediction \
-                                  -Dsonar.projectName=LoanPrediction \
+                                  -Dsonar.projectKey=LoanPrediction-${ROLL} \
+                                  -Dsonar.projectName=LoanPrediction-${ROLL} \
                                   -Dsonar.sources=. \
                                   -Dsonar.sourceEncoding=UTF-8 \
                                   -Dsonar.python.version=3.10 \
@@ -62,41 +59,30 @@ pipeline {
         stage('Docker Build') {
             steps {
                 sh """
-                    docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
-                    docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${REGISTRY}/${NEXUS_REPO}/${IMAGE_NAME}:${IMAGE_TAG}
+                docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+                docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${REGISTRY}/${NEXUS_REPO}/${IMAGE_NAME}:${IMAGE_TAG}
                 """
             }
         }
 
-        stage('Docker Push to Nexus') {
+        stage('Push to Nexus') {
             steps {
-                withCredentials([
-                    usernamePassword(
-                        credentialsId: 'nexus-docker-creds',
-                        usernameVariable: 'NEXUS_USER',
-                        passwordVariable: 'NEXUS_PASS'
-                    )
-                ]) {
+                withCredentials([usernamePassword(credentialsId: 'nexus-docker-creds', usernameVariable: 'NUSER', passwordVariable: 'NPASS')]) {
                     sh """
-                        echo "$NEXUS_PASS" | docker login ${REGISTRY} -u "$NEXUS_USER" --password-stdin
-                        docker push ${REGISTRY}/${NEXUS_REPO}/${IMAGE_NAME}:${IMAGE_TAG}
-                        docker logout ${REGISTRY}
+                    echo "$NPASS" | docker login ${REGISTRY} -u "$NUSER" --password-stdin
+                    docker push ${REGISTRY}/${NEXUS_REPO}/${IMAGE_NAME}:${IMAGE_TAG}
+                    docker logout ${REGISTRY}
                     """
                 }
             }
         }
 
         stage('Deploy to Kubernetes') {
-            when {
-                expression { fileExists('k8s/deployment.yaml') }
-            }
             steps {
                 sh """
-                    kubectl apply -f k8s/deployment.yaml
-                    kubectl apply -f k8s/service.yaml
-                    # Try namespaced first, then default
-                    kubectl rollout status deployment/loan-deployment -n ${K8S_NAMESPACE} || \
-                    kubectl rollout status deployment/loan-deployment
+                kubectl create namespace ${K8S_NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
+                kubectl apply -f k8s/
+                kubectl rollout status deployment/${DEPLOYMENT_NAME} -n ${K8S_NAMESPACE}
                 """
             }
         }
