@@ -107,19 +107,23 @@ spec:
         }
 
         stage('Deploy Loan App') {
-            steps {
-                container('kubectl') {
-                    script {
-                        dir('k8s') {
-                            sh '''
-                                kubectl apply -f deployment.yaml
-                                kubectl apply -f service.yaml
-                                kubectl rollout status deployment/loan-deploy-2401034 -n 2401034
-                            '''
-                        }
-                    }
+    steps {
+        container('kubectl') {
+            script {
+                dir('k8s') {
+
+                    sh """
+                    kubectl get namespace 2401034 || kubectl create namespace 2401034
+                    kubectl apply -f deployment.yaml -n 2401034
+                    kubectl apply -f service.yaml -n 2401034
+                    kubectl apply -f ingress.yaml -n 2401034
+                    """
                 }
             }
+        }
+    }
+}
+
         }
     }
 }
