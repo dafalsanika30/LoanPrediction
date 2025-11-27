@@ -26,7 +26,11 @@ pipeline {
                                 -Dsonar.projectName=LoanPrediction-2401034-V2 \
                                 -Dsonar.sources=. \
                                 -Dsonar.host.url=http://sonarqube.imcc.com \
-                                -Dsonar.login=$SONAR_TOKEN
+                                -Dsonar.token=$SONAR_TOKEN \
+                                -Dsonar.scanner.forceBootstrap=true \
+                                -Dsonar.python.version=3.10 \
+                                -Dsonar.python.indexing.file.limit=5 \
+                                -Dsonar.scanner.skipPlugins=true
                             """
                         }
                     }
