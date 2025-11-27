@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: loan-svc-2401034-v2
-  namespace: student-2401034
+  namespace: 2401034
 spec:
   selector:
     app: loan-app-2401034-v2
