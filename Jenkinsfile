@@ -71,7 +71,7 @@ spec:
                             sonar-scanner \
                                 -Dsonar.projectKey=LoanPrediction-2401034-V2 \
                                 -Dsonar.projectName=LoanPrediction-2401034-V2 \
-                                -Dsonar.host.url=http://my-sonarqube-sonarqube.sonarqube.svc.cluster.local:9000  \
+                                -Dsonar.host.url=http://my-sonarqube-sonarqube.sonarqube.svc.cluster.local:9000 \
                                 -Dsonar.login=$SONAR_TOKEN \
                                 -Dsonar.sources=. \
                                 -Dsonar.python.version=3.10
@@ -99,7 +99,6 @@ spec:
                     sh '''
                         docker tag loan-app:latest nexus-service-for-docker-hosted-registry.nexus.svc.cluster.local:8085/2401034-project/loan-app-2401034-v2:latest
                         docker push nexus-service-for-docker-hosted-registry.nexus.svc.cluster.local:8085/2401034-project/loan-app-2401034-v2:latest
-                        docker pull nexus-service-for-docker-hosted-registry.nexus.svc.cluster.local:8085/2401034-project/loan-app-2401034-v2:latest
                         docker image ls
                     '''
                 }
@@ -107,23 +106,20 @@ spec:
         }
 
         stage('Deploy Loan App') {
-    steps {
-        container('kubectl') {
-            script {
-                dir('k8s') {
-
-                    sh """
-                    kubectl get namespace 2401034 || kubectl create namespace 2401034
-                    kubectl apply -f deployment.yaml -n 2401034
-                    kubectl apply -f service.yaml -n 2401034
-                    kubectl apply -f ingress.yaml -n 2401034
-                    """
+            steps {
+                container('kubectl') {
+                    script {
+                        dir('k8s') {
+                            sh """
+                            kubectl get namespace 2401034 || kubectl create namespace 2401034
+                            kubectl apply -f deployment.yaml -n 2401034
+                            kubectl apply -f service.yaml -n 2401034
+                            kubectl apply -f ingress.yaml -n 2401034
+                            """
+                        }
+                    }
                 }
             }
-        }
-    }
-}
-
         }
     }
 }
