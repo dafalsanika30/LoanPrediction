@@ -1,23 +1,111 @@
+# --------------------------------
+# PersistentVolumeClaim
+# --------------------------------
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: static-pvc
+  namespace: "2401034"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: loan-deploy-2401034-v2
-  namespace: student-2401034
-  labels:
-    app: loan-app-2401034-v2
+  name: loan-app-deployment
+  namespace: "2401034"
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: loan-app-2401034-v2
+      app: loan-app
   template:
     metadata:
       labels:
-        app: loan-app-2401034-v2
+        app: loan-app
     spec:
+      imagePullSecrets:
+        - name: nexus-secret
+
       containers:
-        - name: loan-container
-          image: nexus.imcc.com:8083/docker-hosted/loan-app-2401034-v2:latest
-          imagePullPolicy: Always
+        - name: loan-app
+          image: nexus-service-for-docker-hosted-registry.nexus.svc.cluster.local:8085/2401034-project/loan-app-2401034-v2:latest
           ports:
             - containerPort: 8000
+
+          env:
+            - name: DEBUG
+              value: "0"
+
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+
+          volumeMounts:
+            - name: static-volume
+              mountPath: /app/static
+
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "1"
+              memory: "1Gi"
+
+      volumes:
+        - name: static-volume
+          persistentVolumeClaim:
+            claimName: static-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: loan-app-service
+  namespace: "2401034"
+spec:
+  selector:
+    app: loan-app
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+  type: ClusterIP
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: loan-app-ingress
+  namespace: "2401034"
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: loan.imcc.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: loan-app-service
+                port:
+                  number: 8000
