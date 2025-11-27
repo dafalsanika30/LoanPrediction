@@ -1,14 +1,14 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: loan-svc-2401034
+  name: loan-svc-2401034-v2
   namespace: student-2401034
 spec:
   selector:
-    app: loan-app-2401034
+    app: loan-app-2401034-v2
   type: NodePort
   ports:
     - protocol: TCP
       port: 8000
       targetPort: 8000
-      nodePort: 30234   # unique port (different for every student)
+      nodePort: 30234   # must remain same for teacher to test
