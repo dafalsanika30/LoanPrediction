@@ -1,74 +1,124 @@
 pipeline {
     agent {
         kubernetes {
-            label "jenkins-agent-${env.BUILD_ID}"
-            yaml """
+            yaml '''
 apiVersion: v1
 kind: Pod
-metadata:
-  labels:
-    app: jenkins-agent
 spec:
   containers:
-    - name: docker
-      image: docker:dind
-      command: ["dockerd-entrypoint.sh"]
-      securityContext:
-        privileged: true
-      volumeMounts:
-        - name: workspace-volume
-          mountPath: /home/jenkins/agent
-  volumes:
-    - name: workspace-volume
-      emptyDir: {}
-"""
-        }
-    }
+  - name: sonar-scanner
+    image: sonarsource/sonar-scanner-cli
+    command: ["cat"]
+    tty: true
 
-    environment {
-        IMAGE_NAME = "loan-app-2401034-v2"
-        IMAGE_TAG = "latest"
-        REGISTRY = "nexus.imcc.com"
-        NEXUS_REPO = "docker-hosted"
+  - name: kubectl
+    image: bitnami/kubectl:latest
+    command: ["cat"]
+    tty: true
+    securityContext:
+      runAsUser: 0
+      readOnlyRootFilesystem: false
+    env:
+    - name: KUBECONFIG
+      value: /kube/config
+    volumeMounts:
+    - name: kubeconfig-secret
+      mountPath: /kube/config
+      subPath: kubeconfig
+
+  - name: dind
+    image: docker:dind
+    securityContext:
+      privileged: true
+    env:
+    - name: DOCKER_TLS_CERTDIR
+      value: ""
+    volumeMounts:
+    - name: docker-config
+      mountPath: /etc/docker/daemon.json
+      subPath: daemon.json
+
+  volumes:
+  - name: docker-config
+    configMap:
+      name: docker-daemon-config
+  - name: kubeconfig-secret
+    secret:
+      secretName: kubeconfig-secret
+'''
+        }
     }
 
     stages {
 
-        stage('Checkout') {
+        stage('Build Docker Image') {
             steps {
-                checkout scm
-            }
-        }
-
-        stage('Docker Build') {
-            steps {
-                container('docker') {
-                    sh """
-                    docker build -t ${REGISTRY}/${NEXUS_REPO}/${IMAGE_NAME}:${IMAGE_TAG} .
-                    """
+                container('dind') {
+                    sh '''
+                        sleep 15
+                        docker build -t loan-app:latest .
+                        docker image ls
+                    '''
                 }
             }
         }
 
-        stage('Docker Push') {
+        stage('SonarQube Analysis') {
             steps {
-                container('docker') {
-                    sh """
-                    docker push ${REGISTRY}/${NEXUS_REPO}/${IMAGE_NAME}:${IMAGE_TAG}
-                    """
+                container('sonar-scanner') {
+                    withCredentials([string(credentialsId: 'sonar-token-2401034', variable: 'SONAR_TOKEN')]) {
+                        sh '''
+                            sonar-scanner \
+                                -Dsonar.projectKey=LoanPrediction-2401034-V2 \
+                                -Dsonar.projectName=LoanPrediction-2401034-V2 \
+                                -Dsonar.host.url=http://sonarqube.imcc.com \
+                                -Dsonar.login=$SONAR_TOKEN \
+                                -Dsonar.sources=. \
+                                -Dsonar.python.version=3.10
+                        '''
+                    }
                 }
             }
         }
 
-        stage('Deploy to Kubernetes') {
-            when {
-                expression { fileExists("k8s/deployment.yaml") }
-            }
+        stage('Login to Docker Registry') {
             steps {
-                sh """
-                kubectl apply -f k8s/deployment.yaml
-                kubectl apply -f k8s/service.yaml
-                """
+                container('dind') {
+                    sh '''
+                        docker --version
+                        sleep 10
+                        docker login nexus-service-for-docker-hosted-registry.nexus.svc.cluster.local:8085 -u admin -p Changeme@2025
+                    '''
+                }
+            }
+        }
+
+        stage('Build - Tag - Push') {
+            steps {
+                container('dind') {
+                    sh '''
+                        docker tag loan-app:latest nexus-service-for-docker-hosted-registry.nexus.svc.cluster.local:8085/2401034-project/loan-app-2401034-v2:latest
+                        docker push nexus-service-for-docker-hosted-registry.nexus.svc.cluster.local:8085/2401034-project/loan-app-2401034-v2:latest
+                        docker pull nexus-service-for-docker-hosted-registry.nexus.svc.cluster.local:8085/2401034-project/loan-app-2401034-v2:latest
+                        docker image ls
+                    '''
+                }
+            }
+        }
+
+        stage('Deploy Loan App') {
+            steps {
+                container('kubectl') {
+                    script {
+                        dir('k8s') {
+                            sh '''
+                                kubectl apply -f deployment.yaml
+                                kubectl apply -f service.yaml
+                                kubectl rollout status deployment/loan-deploy-2401034 -n 2401034
+                            '''
+                        }
+                    }
+                }
             }
         }
     }
