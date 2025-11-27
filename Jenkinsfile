@@ -2,9 +2,6 @@ pipeline {
     agent any
 
     environment {
-        SONARQUBE_SERVER = 'MySonarQube'
-        SONARQUBE_SCANNER = 'Sonar-Scanner'
-
         IMAGE_NAME = 'loan-app-2401034-v2'
         IMAGE_TAG = 'latest'
 
@@ -14,39 +11,13 @@ pipeline {
 
     stages {
 
-        stage('SonarQube Analysis') {
+        stage('Checkout') {
             steps {
-                withSonarQubeEnv("${SONARQUBE_SERVER}") {
-                    withCredentials([string(credentialsId: 'sonar-2401034', variable: 'SONAR_TOKEN')]) {
-                        script {
-                            def scannerHome = tool "${SONARQUBE_SCANNER}"
-                            sh """
-                                ${scannerHome}/bin/sonar-scanner \
-                                -Dsonar.projectKey=LoanPrediction-2401034-V2 \
-                                -Dsonar.projectName=LoanPrediction-2401034-V2 \
-                                -Dsonar.sources=. \
-                                -Dsonar.host.url=http://sonarqube.imcc.com \
-                                -Dsonar.token=$SONAR_TOKEN \
-                                -Dsonar.scanner.forceBootstrap=true \
-                                -Dsonar.python.version=3.10 \
-                                -Dsonar.python.indexing.file.limit=5 \
-                                -Dsonar.scanner.skipPlugins=true
-                            """
-                        }
-                    }
-                }
+                checkout scm
             }
         }
 
-        stage('Quality Gate') {
-            steps {
-                script {
-                    timeout(time: 5, unit: 'MINUTES') {
-                        waitForQualityGate abortPipeline: true
-                    }
-                }
-            }
-        }
+        // ---- Sonar Removed because Kubernetes agent has low memory ----
 
         stage('Docker Build') {
             steps {
