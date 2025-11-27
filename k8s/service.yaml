@@ -1,14 +1,14 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: loan-svc-2401034-v2
+  name: loan-app-service
   namespace: "2401034"
 spec:
   selector:
-    app: loan-app-2401034-v2
+    app: loan-app      # MUST match deployment label
   type: NodePort
   ports:
     - protocol: TCP
       port: 8000
       targetPort: 8000
-      nodePort: 30234   # must remain same for teacher to test
+      nodePort: 30234   # REQUIRED (teacher testing value)
