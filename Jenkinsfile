@@ -71,7 +71,7 @@ spec:
                             sonar-scanner \
                                 -Dsonar.projectKey=LoanPrediction-2401034-V2 \
                                 -Dsonar.projectName=LoanPrediction-2401034-V2 \
-                                -Dsonar.host.url=http://sonarqube.imcc.com \
+                                -Dsonar.host.url=http://my-sonarqube-sonarqube.sonarqube.svc.cluster.local:9000  \
                                 -Dsonar.login=$SONAR_TOKEN \
                                 -Dsonar.sources=. \
                                 -Dsonar.python.version=3.10
