@@ -89,12 +89,12 @@ source env/bin/activate
 
 ### Windows:
 ```bash
-pip install -r requirement.txt
+pip install -r requirements.txt
 ```
 
 ### Linux:
 ```bash
-pip3 install -r requirement.txt
+pip3 install -r requirements.txt
 ```
 
 ---
