@@ -1,19 +1,6 @@
 # --------------------------------
-# PersistentVolumeClaim
+# Deployment (no PVC needed)
 # --------------------------------
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: static-pvc
-  namespace: "2401034"
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
-
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -56,24 +43,31 @@ spec:
             initialDelaySeconds: 30
             periodSeconds: 30
 
-          volumeMounts:
-            - name: static-volume
-              mountPath: /app/static
-
-          resources:
-            requests:
-              cpu: "500m"
-              memory: "512Mi"
-            limits:
-              cpu: "1"
-              memory: "1Gi"
-
-      volumes:
-        - name: static-volume
-          persistentVolumeClaim:
-            claimName: static-pvc
 
 ---
+# --------------------------------
+# Service (NodePort + Ingress Compatible)
+# --------------------------------
+apiVersion: v1
+kind: Service
+metadata:
+  name: loan-app-service
+  namespace: "2401034"
+spec:
+  selector:
+    app: loan-app
+  type: NodePort
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
+      nodePort: 30244
+
+
+---
+# --------------------------------
+# Ingress (Domain Routing)
+# --------------------------------
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -93,4 +87,4 @@ spec:
               service:
                 name: loan-app-service
                 port:
-                  number: 8000
+                  number: 80
