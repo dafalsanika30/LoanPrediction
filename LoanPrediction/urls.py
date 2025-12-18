@@ -20,15 +20,17 @@ from . import views
 from django.conf import settings
 from django.conf.urls.static import static
 
-
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('',views.home,name='home'),
-    path('aboutus/',views.aboutus,name='aboutus'),
-    path('analysis/',views.analysis,name='analysis'),
-    path('predict/', views.predict, name='predict'), 
-    # path('upload/', views.upload_csv, name='upload_csv'),  # File Upload Route
+    path('', views.home, name='home'),
+    path('aboutus/', views.aboutus, name='aboutus'),
+    path('analysis/', views.analysis, name='analysis'),
+    path('predict/', views.predict, name='predict'),
     path('upload/', views.upload_csv, name='upload_csv'),
-   
-]+ static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)
+]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
     
