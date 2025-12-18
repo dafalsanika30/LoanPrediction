@@ -73,8 +73,6 @@ kind: Ingress
 metadata:
   name: loan-app-ingress
   namespace: "2401034"
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   ingressClassName: nginx
   rules:
@@ -82,6 +80,13 @@ spec:
       http:
         paths:
           - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: loan-app-service
+                port:
+                  number: 80
+          - path: /static
             pathType: Prefix
             backend:
               service:
