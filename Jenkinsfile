@@ -113,7 +113,7 @@ spec:
                             sh """
                             kubectl get namespace 2401034 || kubectl create namespace 2401034
                             kubectl apply -f deployment.yaml -n 2401034
-                            kubectl apply -f service.yaml -n 2401034
+                            
                             
                             # Force delete old pods so rollout progresses
                             kubectl delete pod -l app=loan-app -n 2401034 || true
