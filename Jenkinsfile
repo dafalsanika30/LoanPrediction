@@ -128,6 +128,25 @@ spec:
                 }
             }
         }
+        stage('Debug Kubernetes State') {
+    steps {
+        container('kubectl') {
+            sh """
+            echo "========== PODS =========="
+            kubectl get pods -n 2401034
+
+            echo "========== SERVICES =========="
+            kubectl get svc -n 2401034
+
+            echo "========== INGRESS =========="
+            kubectl get ingress -n 2401034
+
+            echo "========== POD LOGS =========="
+            kubectl logs -l app=loan-app -n 2401034 || true
+            """
+        }
+    }
+}
 
     }
 }
